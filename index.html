@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Heart to Heart | ISA Chulalongkorn</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -16,17 +16,20 @@
       --blush: #e8d5d1;
     }
 
-    /* Fix black backstrip + Safari viewport quirks */
+    /* Mobile/Safari stability */
     html, body {
       width: 100%;
       height: 100%;
       margin: 0;
+      padding: 0;
       background: var(--cream);
-      overflow-x: hidden;
+      overflow: hidden;
+      -webkit-text-size-adjust: 100%;
+      touch-action: manipulation;
     }
 
     body {
-      min-height: 100dvh;
+      min-height: 100svh; /* better on mobile than 100vh */
       background-color: var(--cream);
       color: var(--deep-green);
       font-family: 'Lato', sans-serif;
@@ -34,7 +37,16 @@
       justify-content: center;
       align-items: center;
       transition: background-color 2s ease;
-      overflow: hidden;
+      position: relative;
+    }
+
+    #app-container {
+      text-align: center;
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      z-index: 10;
+      box-sizing: border-box;
       position: relative;
     }
 
@@ -148,7 +160,7 @@
     }
 
     /* =========================
-       BIRDS (diagonal + flap)
+       BIRDS
        ========================= */
     .birds {
       position: fixed;
@@ -159,7 +171,6 @@
       opacity: 0.65;
       filter: blur(0.1px);
     }
-
     .bird {
       position: absolute;
       left: 0;
@@ -171,29 +182,21 @@
       transform: translate3d(var(--fromX), var(--fromY), 0) scale(var(--s, 1));
       will-change: transform, opacity;
     }
-
     @keyframes flyDiag {
       0%   { transform: translate3d(var(--fromX), var(--fromY), 0) scale(var(--s, 1)); opacity: 0; }
       10%  { opacity: 0.65; }
       90%  { opacity: 0.55; }
       100% { transform: translate3d(var(--toX), var(--toY), 0) scale(var(--s, 1)); opacity: 0; }
     }
-
-    /* wing flap */
-    .bird .wing {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: flap 0.35s ease-in-out infinite;
-    }
+    .bird .wing { transform-box: fill-box; transform-origin: center; animation: flap 0.35s ease-in-out infinite; }
     .bird .wing.right { animation-delay: 0.02s; }
-
     @keyframes flap {
       0%   { transform: rotate(8deg) scaleY(1); }
       50%  { transform: rotate(-18deg) scaleY(0.92); }
       100% { transform: rotate(8deg) scaleY(1); }
     }
 
-    /* Decorative Elements */
+    /* Decorative */
     .vignette {
       position: fixed; inset: 0;
       background: radial-gradient(circle, transparent 50%, rgba(26, 42, 29, 0.1));
@@ -203,62 +206,185 @@
     .top-left { top: -120px; left: -120px; transform: rotate(15deg); }
     .bottom-right { bottom: -120px; right: -120px; transform: rotate(195deg); }
 
-    #app-container { text-align: center; max-width: 1000px; width: 100%; z-index: 10; padding: 20px; position: relative; }
+    /* =========================
+       HEADERS
+       ========================= */
+    .isa-tag {
+      font-size: 0.6rem;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
 
-    /* Branding Headers */
-    .isa-tag { font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 10px; opacity: 0.7; }
-    h1.main-title { font-family: 'Pinyon Script', cursive; font-size: 5rem; color: var(--gold); margin: 0; line-height: 1; }
-    .sub-theme { font-family: 'Playfair Display', serif; font-size: 1rem; letter-spacing: 10px; text-transform: uppercase; margin-bottom: 50px; }
+    h1.main-title {
+      font-family: 'Pinyon Script', cursive;
+      font-size: clamp(3rem, 12vw, 6rem);
+      color: var(--gold);
+      margin: 0;
+      line-height: 1.1;
+    }
 
-    /* Deck Area */
-    .deck-area { position: relative; height: 400px; width: 100%; display: flex; justify-content: center; align-items: center; }
+    .sub-theme {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(0.7rem, 2vw, 1rem);
+      letter-spacing: clamp(4px, 1vw, 10px);
+      text-transform: uppercase;
+      margin-bottom: clamp(20px, 5vh, 50px);
+    }
+
+    /* =========================
+       DECK
+       ========================= */
+    .deck-area {
+      position: relative;
+      height: clamp(250px, 40vh, 400px);
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px;
+    }
+
     .card {
-      position: absolute; width: 180px; height: 260px; background: #fff;
-      border-radius: 2px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      cursor: pointer; transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); overflow: hidden;
+      position: absolute;
+      width: clamp(120px, 25vw, 180px);
+      height: clamp(170px, 35vh, 260px);
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+      overflow: hidden;
     }
-    .card::after {
-      content: ''; position: absolute; inset: 10px; border: 1px solid var(--gold);
-      background-color: var(--deep-green); background-image: url("https://www.transparenttextures.com/patterns/dark-matter.png");
-    }
-    .card-crest { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--gold); font-family: 'Playfair Display', serif; font-size: 2rem; z-index: 2; opacity: 0.6; }
 
-    /* Result View */
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid var(--gold);
+      background-color: var(--deep-green);
+      background-image: url("https://www.transparenttextures.com/patterns/dark-matter.png");
+    }
+
+    .card-crest {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--gold);
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      z-index: 2;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* =========================
+       RESULT
+       ========================= */
     #result-screen { display: none; opacity: 0; }
 
     #capture-frame {
       background: #fff;
-      padding: 60px 40px;
-      width: 380px;
+      padding: clamp(30px, 5vw, 60px) clamp(20px, 4vw, 40px);
+      width: 90vw;
+      max-width: 400px;
       margin: 0 auto;
       position: relative;
+      box-sizing: border-box;
       border: 1px solid rgba(197, 160, 89, 0.2);
       box-shadow: 0 30px 60px rgba(0,0,0,0.05);
       background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
     }
     #capture-frame::before {
-      content: ""; position: absolute; inset: 15px;
-      border: 0.5px solid var(--gold); pointer-events: none;
+      content: "";
+      position: absolute;
+      inset: 15px;
+      border: 0.5px solid var(--gold);
+      pointer-events: none;
     }
 
-    .result-isa { font-size: 0.55rem; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 20px; }
-    .result-theme { font-family: 'Pinyon Script', cursive; font-size: 2.8rem; color: var(--deep-green); margin: 0; }
-    .quote-box { font-family: 'Playfair Display', serif; font-size: 1.8rem; line-height: 1.4; margin: 40px 0; font-style: italic; }
-    .quote-author { font-family: 'Lato', sans-serif; font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; opacity: 0.6; }
+    .result-isa {
+      font-size: 0.55rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 20px;
+    }
 
-    .recommendation { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 30px; border-top: 0.5px solid rgba(0,0,0,0.1); text-align: left; }
-    .rec-label { font-size: 0.5rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); display: block; }
+    .result-theme {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 2.8rem;
+      color: var(--deep-green);
+      margin: 0;
+    }
+
+    .quote-box {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      line-height: 1.4;
+      margin: 30px 0;
+      font-style: italic;
+    }
+
+    .quote-author {
+      font-family: 'Lato', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+
+    .recommendation {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 0.5px solid rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .rec-label {
+      font-size: 0.5rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+    }
+
     .rec-val { font-family: 'Playfair Display', serif; font-size: 0.9rem; }
 
-    /* Buttons */
-    .btn-group { margin-top: 40px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-    .btn {
-      background: none; border: 1px solid var(--gold); padding: 12px 25px;
-      font-family: 'Lato', sans-serif; text-transform: uppercase; letter-spacing: 2px;
-      font-size: 0.7rem; cursor: pointer; transition: 0.3s;
-      backdrop-filter: blur(4px);
+    /* =========================
+       BUTTONS
+       ========================= */
+    .btn-group {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .btn-save { background: var(--gold); color: white; }
+
+    .btn {
+      background: none;
+      border: 1px solid var(--gold);
+      padding: 10px 20px;
+      font-family: 'Lato', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: 0.3s;
+      backdrop-filter: blur(4px);
+      flex: 1 1 auto;
+      min-width: 120px;
+      max-width: 200px;
+    }
+
+    .btn-save { background: var(--gold); color: #fff; }
     .btn-save:hover { background: var(--deep-green); border-color: var(--deep-green); }
 
     .btn-sound {
@@ -271,11 +397,6 @@
       color: #fff;
       border-color: rgba(26,42,29,0.85);
     }
-
-    @media (max-width: 450px) {
-      #capture-frame { width: 85vw; padding: 40px 20px; }
-      h1.main-title { font-size: 3.5rem; }
-    }
   </style>
 </head>
 
@@ -283,8 +404,8 @@
   <div class="garden-bg"></div>
   <div class="petals" id="petals"></div>
   <div class="birds" id="birds"></div>
-
   <div class="vignette"></div>
+
   <img src="https://www.transparenttextures.com/patterns/flowers.png" class="botanical top-left" />
   <img src="https://www.transparenttextures.com/patterns/flowers.png" class="botanical bottom-right" />
 
@@ -366,12 +487,10 @@
     window.addEventListener('resize', () => spawnPetals(window.innerWidth < 480 ? 12 : 18));
 
     /* =========================
-       SOUND: Birds only (synced to birds)
-       Default ON; starts on first interaction (browser rule)
+       SOUND (birds only)
        ========================= */
     let audioCtx = null;
     let masterGain = null;
-
     let soundOn = true;
     let audioPrimed = false;
 
@@ -394,23 +513,17 @@
       masterGain.gain.cancelScheduledValues(now);
       masterGain.gain.setValueAtTime(masterGain.gain.value, now);
       masterGain.gain.exponentialRampToValueAtTime(soundOn ? 0.85 : 0.0001, now + 0.12);
-
       updateSoundButtons();
     }
 
     function setSound(on) {
       soundOn = on;
-
-      if (!audioPrimed || !audioCtx || !masterGain) {
-        updateSoundButtons();
-        return;
-      }
+      if (!audioPrimed || !audioCtx || !masterGain) { updateSoundButtons(); return; }
 
       const now = audioCtx.currentTime;
       masterGain.gain.cancelScheduledValues(now);
       masterGain.gain.setValueAtTime(masterGain.gain.value, now);
       masterGain.gain.exponentialRampToValueAtTime(on ? 0.85 : 0.0001, now + 0.12);
-
       updateSoundButtons();
     }
 
@@ -425,7 +538,6 @@
       });
     }
 
-    // Autostart audio on first interaction
     (function bindAutoStart() {
       const once = async () => {
         await primeAndApplyAudio();
@@ -436,23 +548,19 @@
       window.addEventListener("keydown", once);
     })();
 
-    // Bind sound button #1 now; #2 will be bound when it appears
     document.getElementById("soundBtn").addEventListener("click", (e) => {
       e.stopPropagation();
       toggleSound();
     });
 
-    // Chirp with pan + per-chirp volume
     function pleasantChirp({ pan = 0, volume = 1 } = {}) {
       if (!audioCtx || !audioPrimed || !soundOn) return;
 
       const now = audioCtx.currentTime;
-
       const osc1 = audioCtx.createOscillator();
       const osc2 = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       const filter = audioCtx.createBiquadFilter();
-
       const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : null;
 
       osc1.type = "sine";
@@ -523,7 +631,6 @@
       bird.className = 'bird';
 
       const mode = Math.random() > 0.5 ? "up" : "down";
-
       const fromX = "-25vw";
       const toX   = "120vw";
 
@@ -535,8 +642,8 @@
         ? (8 + Math.random() * 25) + "vh"
         : (55 + Math.random() * 30) + "vh";
 
-      const dur = 9 + Math.random() * 10;     // 9–19s
-      const delay = Math.random() * 2.5;      // 0–2.5s
+      const dur = 9 + Math.random() * 10;
+      const delay = Math.random() * 2.5;
       const scale = (0.75 + Math.random() * 0.7).toFixed(2);
       const opacity = (0.28 + Math.random() * 0.35).toFixed(2);
 
@@ -566,23 +673,17 @@
 
       birdsHost.appendChild(bird);
 
-      // ---- SOUND SYNC ----
-      // since birds enter from left, pan is left-ish at entry, closer to center mid-flight
       const entryPan = -0.55 + Math.random() * 0.25;
       const midPan   = -0.10 + Math.random() * 0.20;
-
-      // Slight illusion of “closer bird = louder”
       const baseVol = 0.85 + Math.random() * 0.25;
 
       setTimeout(() => {
         pleasantChirp({ pan: entryPan, volume: baseVol });
 
-        // sometimes a second chirp mid-flight
         if (Math.random() > 0.55) {
           setTimeout(() => pleasantChirp({ pan: midPan, volume: baseVol * 0.92 }), (dur * 0.45) * 1000);
         }
 
-        // sometimes a tiny double right after entry
         if (Math.random() > 0.7) {
           setTimeout(() => pleasantChirp({ pan: entryPan, volume: baseVol * 0.72 }), 220 + Math.random() * 180);
         }
@@ -597,11 +698,10 @@
         if (Math.random() > 0.35) spawnBird();
       }, 2200);
     }
-
     startBirdFlights();
 
     /* =========================
-       Your existing logic (cards)
+       CARDS
        ========================= */
     const colorPalette = [
       { name: "Ivory Silk", hex: "#fffdf0", quote: "To love at all is to be vulnerable.", source: "C.S. Lewis", movie: "Shadowlands", book: "The Four Loves" },
@@ -661,10 +761,20 @@
       const cards = document.querySelectorAll('.card');
       shuffleState = 4;
       status.innerText = "Draw your heart's secret";
+
+      const windowWidth = window.innerWidth;
+      let spread, angleStep;
+
+      if (windowWidth < 480) { spread = 22; angleStep = 5; }
+      else if (windowWidth < 1024) { spread = 35; angleStep = 7; }
+      else { spread = 45; angleStep = 9; }
+
       cards.forEach((card, i) => {
-        const angle = (i - 5.5) * 8;
-        const x = (i - 5.5) * 40;
-        card.style.transform = `translate(${x}px, 20px) rotate(${angle}deg)`;
+        const centerOffset = (cards.length - 1) / 2;
+        const angle = (i - centerOffset) * angleStep;
+        const x = (i - centerOffset) * spread;
+        const y = windowWidth < 480 ? 10 : 20;
+        card.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
       });
     }
 
@@ -680,6 +790,7 @@
         document.getElementById('quote-source').innerText = `— ${data.source}`;
         document.getElementById('movie-title').innerText = data.movie;
         document.getElementById('book-title').innerText = data.book;
+
         setTimeout(() => { document.getElementById('result-screen').style.opacity = '1'; }, 100);
 
         const b2 = document.getElementById('soundBtn2');
