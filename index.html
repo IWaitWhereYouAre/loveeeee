@@ -29,8 +29,9 @@
             background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
         }
 
+        /* Decorative Elements */
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 50%, rgba(26, 42, 29, 0.1)); pointer-events: none; z-index: 5; }
-        .botanical { position: fixed; width: 450px; opacity: 0.15; pointer-events: none; z-index: 0; }
+        .botanical-bg { position: fixed; width: 450px; opacity: 0.15; pointer-events: none; z-index: 0; }
         .top-left { top: -120px; left: -120px; transform: rotate(15deg); }
         .bottom-right { bottom: -120px; right: -120px; transform: rotate(195deg); }
 
@@ -52,7 +53,7 @@
         }
         .card-crest { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--gold); font-family: 'Playfair Display', serif; font-size: 2rem; z-index: 2; opacity: 0.6; }
 
-        #result-screen { display: none; opacity: 0; transition: opacity 1s ease; }
+        #result-screen { display: none; opacity: 0; }
         
         #capture-frame {
             background: #fff;
@@ -63,15 +64,15 @@
             border: 1px solid rgba(197, 160, 89, 0.2);
             box-shadow: 0 30px 60px rgba(0,0,0,0.05);
             background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
-            overflow: hidden; /* Ensures garden growth stays inside */
+            overflow: hidden;
         }
 
         #capture-frame::before {
             content: ""; position: absolute; inset: 15px;
-            border: 0.5px solid var(--gold); pointer-events: none; z-index: 2;
+            border: 0.5px solid var(--gold); pointer-events: none; z-index: 10;
         }
 
-        /* Container for the unique random botanical growth */
+        /* Personalized Garden Container */
         #garden-growth-container {
             position: absolute;
             inset: 0;
@@ -79,7 +80,7 @@
             z-index: 1;
         }
 
-        .content-wrap { position: relative; z-index: 3; } /* Keeps text above flowers */
+        .content-layer { position: relative; z-index: 5; }
 
         .result-isa { font-size: 0.55rem; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 20px; }
         .result-theme { font-family: 'Pinyon Script', cursive; font-size: 2.8rem; color: var(--deep-green); margin: 0; }
@@ -90,7 +91,7 @@
         .rec-label { font-size: 0.5rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); display: block; }
         .rec-val { font-family: 'Playfair Display', serif; font-size: 0.9rem; }
 
-        .seed-tag { font-size: 0.4rem; opacity: 0.3; margin-top: 20px; letter-spacing: 1px; }
+        .seed-id { font-size: 0.45rem; opacity: 0.3; margin-top: 15px; letter-spacing: 1px; }
 
         .btn-group { margin-top: 40px; display: flex; justify-content: center; gap: 15px; }
         .btn {
@@ -110,8 +111,8 @@
 <body>
 
     <div class="vignette"></div>
-    <img src="https://www.transparenttextures.com/patterns/flowers.png" class="botanical top-left">
-    <img src="https://www.transparenttextures.com/patterns/flowers.png" class="botanical bottom-right">
+    <img src="https://www.transparenttextures.com/patterns/flowers.png" class="botanical-bg top-left">
+    <img src="https://www.transparenttextures.com/patterns/flowers.png" class="botanical-bg bottom-right">
 
     <div id="app-container">
         <div id="ritual-screen">
@@ -127,7 +128,7 @@
             <div id="capture-frame">
                 <div id="garden-growth-container"></div>
                 
-                <div class="content-wrap">
+                <div class="content-layer">
                     <span class="result-isa">ISA Chulalongkorn</span>
                     <h2 class="result-theme">Heart to Heart</h2>
                     <div class="quote-box" id="quote-text"></div>
@@ -143,7 +144,7 @@
                             <span class="rec-val" id="book-title"></span>
                         </div>
                     </div>
-                    <div class="seed-tag" id="seed-display"></div>
+                    <div class="seed-id" id="bloom-seed"></div>
                 </div>
             </div>
 
@@ -151,24 +152,21 @@
                 <button class="btn" onclick="location.reload()">Reset</button>
                 <button class="btn btn-save" onclick="saveImage()">Save Picture</button>
             </div>
-            <p style="font-size: 0.6rem; margin-top: 20px; opacity: 0.5; letter-spacing: 1px;">Saved to your library</p>
+            <p style="font-size: 0.6rem; margin-top: 20px; opacity: 0.5; letter-spacing: 1px;">A unique bloom for a unique moment.</p>
         </div>
     </div>
 
     <script>
         const colorPalette = [
-                { name: "Ivory Silk", hex: "#fffdf0", quote: "To love at all is to be vulnerable.", source: "C.S. Lewis", movie: "Shadowlands", book: "The Four Loves" }, 
-                { name: "Vintage Champagne", hex: "#f5ead0", quote: "Love is not blind; it sees more, not less.", source: "Erich Fromm", movie: "In the Mood for Love", book: "A Lover's Discourse" }, 
-                { name: "Tudor Rose", hex: "#fce3e3", quote: "Everything that frightens us is something helpless that wants our love.", source: "Rainer Maria Rilke", movie: "The Shape of Water", book: "Letters to a Young Poet" }, 
-                { name: "English Lavender", hex: "#e8e1f5", quote: "It is not necessary to hurry intimacy.", source: "Anne Carson", movie: "Before Sunset", book: "Eros the Bittersweet" }, 
-                { name: "Versailles Sage", hex: "#e2ede4", quote: "The world is full of magic things, patiently waiting for our senses to grow sharper.", source: "W.B. Yeats", movie: "Song of the Sea", book: "The Wind Among the Reeds" }, 
-                { name: "Gilded Moss", hex: "#ecebbd", quote: "The only way to make sense out of change is to plunge into it.", source: "Alan Watts", movie: "Spring, Summer, Fall...", book: "The Wisdom of Insecurity" }, 
-                { name: "Biedermeier Blue", hex: "#e0f0f5", quote: "Loneliness is the poverty of self; solitude is the richness of self.", source: "May Sarton", movie: "Lost in Translation", book: "Journal of a Solitude" }, 
-                { name: "Old Manor Taupe", hex: "#ede6e1", quote: "Acceptance is a small, quiet room.", source: "Cheryl Strayed", movie: "Nomadland", book: "Tiny Beautiful Things" }, 
-                { name: "Terracotta Sundial", hex: "#f5e6d3", quote: "Beauty is in things imperfect, impermanent, and incomplete.", source: "Leonard Koren", movie: "Arrietty", book: "The Beauty of Ordinary" }, 
-                { name: "Slate Manor", hex: "#e1e6e8", quote: "Love is the extremely difficult realization that something other than oneself is real.", source: "Iris Murdoch", movie: "Eternal Sunshine", book: "The Sovereignty of Good" }, 
-                { name: "Linen Prayer", hex: "#fcfaf7", quote: "Love is a relationship between a person and love itself.", source: "Søren Kierkegaard", movie: "Still Walking", book: "Works of Love" }, 
-                { name: "Ash Rose", hex: "#e6dede", quote: "Grief is the final manifestation of love.", source: "Joan Didion", movie: "Aftersun", book: "Blue Nights" }
+            { name: "Ivory Silk", hex: "#fffdf0", quote: "To love at all is to be vulnerable.", source: "C.S. Lewis", movie: "Shadowlands", book: "The Four Loves" }, 
+            { name: "Vintage Champagne", hex: "#f5ead0", quote: "Love is not blind; it sees more, not less.", source: "Erich Fromm", movie: "In the Mood for Love", book: "A Lover's Discourse" }, 
+            { name: "Tudor Rose", hex: "#fce3e3", quote: "Everything that frightens us is something helpless that wants our love.", source: "Rainer Maria Rilke", movie: "The Shape of Water", book: "Letters to a Young Poet" }, 
+            { name: "English Lavender", hex: "#e8e1f5", quote: "It is not necessary to hurry intimacy.", source: "Anne Carson", movie: "Before Sunset", book: "Eros the Bittersweet" }, 
+            { name: "Versailles Sage", hex: "#e2ede4", quote: "The world is full of magic things, patiently waiting for our senses to grow sharper.", source: "W.B. Yeats", movie: "Song of the Sea", book: "The Wind Among the Reeds" }, 
+            { name: "Gilded Moss", hex: "#ecebbd", quote: "The only way to make sense out of change is to plunge into it.", source: "Alan Watts", movie: "Spring, Summer, Fall...", book: "The Wisdom of Insecurity" }, 
+            { name: "Biedermeier Blue", hex: "#e0f0f5", quote: "Loneliness is the poverty of self; solitude is the richness of self.", source: "May Sarton", movie: "Lost in Translation", book: "Journal of a Solitude" }, 
+            { name: "Old Manor Taupe", hex: "#ede6e1", quote: "Acceptance is a small, quiet room.", source: "Cheryl Strayed", movie: "Nomadland", book: "Tiny Beautiful Things" }, 
+            { name: "Ash Rose", hex: "#e6dede", quote: "Grief is the final manifestation of love.", source: "Joan Didion", movie: "Aftersun", book: "Blue Nights" }
         ];
 
         const deck = document.getElementById('deck-container');
@@ -222,8 +220,9 @@
             container.innerHTML = ''; 
             
             const seed = Date.now();
-            document.getElementById('seed-display').innerText = `Bloom Ref: #${seed}`;
+            document.getElementById('bloom-seed').innerText = `Bloom ID: #${seed.toString().slice(-6)}`;
             
+            // Pseudo-random function based on the seed
             const random = (i) => {
                 const x = Math.sin(seed + i) * 10000;
                 return x - Math.floor(x);
@@ -231,27 +230,39 @@
 
             const flowerImages = [
                 "https://www.transparenttextures.com/patterns/flowers.png",
-                "https://www.transparenttextures.com/patterns/natural-paper.png"
+                "https://www.transparenttextures.com/patterns/natural-paper.png" // using texture as a mask
             ];
 
-            for (let i = 0; i < 8; i++) {
+            // Generate 6-8 botanical elements
+            for (let i = 0; i < 7; i++) {
                 const img = document.createElement('img');
-                img.src = flowerImages[Math.floor(random(i) * flowerImages.length)];
+                img.src = flowerImages[0]; // Using your flower pattern
                 img.style.position = 'absolute';
-                img.style.width = (200 + random(i+1) * 250) + 'px';
-                img.style.left = (random(i+2) * 120 - 20) + '%';
-                img.style.top = (random(i+3) * 120 - 20) + '%';
-                img.style.transform = `rotate(${random(i+4) * 360}deg)`;
-                img.style.opacity = (0.05 + random(i+5) * 0.1).toString();
-                img.style.filter = 'sepia(1) saturate(0.3) contrast(0.8)'; 
+                
+                // Randomized based on seed
+                const size = 200 + (random(i) * 250);
+                img.style.width = size + 'px';
+                img.style.left = (random(i+1) * 100 - 20) + '%';
+                img.style.top = (random(i+2) * 100 - 20) + '%';
+                img.style.transform = `rotate(${random(i+3) * 360}deg) scale(0.5)`;
+                img.style.opacity = '0';
+                img.style.filter = 'sepia(1) saturate(0.5) brightness(1.2)';
+                img.style.transition = `all 2s cubic-bezier(0.2, 1, 0.3, 1) ${i * 0.2}s`;
+                
                 container.appendChild(img);
+
+                // Trigger "Growth" animation
+                setTimeout(() => {
+                    img.style.opacity = (0.05 + random(i+4) * 0.15).toString();
+                    img.style.transform = `rotate(${random(i+3) * 360}deg) scale(1)`;
+                }, 100);
             }
         }
 
         function revealCard() {
             const data = colorPalette[Math.floor(Math.random() * colorPalette.length)];
             
-            // --- GENERATE THE UNIQUE GARDEN ---
+            // Generate the unique garden layout
             generateGardenGrowth(); 
             
             document.getElementById('ritual-screen').style.opacity = '0';
@@ -272,11 +283,11 @@
             const captureArea = document.getElementById('capture-frame');
             html2canvas(captureArea, {
                 backgroundColor: "#ffffff",
-                scale: 3,
+                scale: 3, // Higher resolution for sharing
                 useCORS: true
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `HeartToHeart_${Date.now()}.png`;
+                link.download = `HeartToHeart_ISA_${Date.now()}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
