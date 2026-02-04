@@ -46,7 +46,6 @@
         linear-gradient(120deg, rgba(248,245,240,1), rgba(248,245,240,1));
     }
 
-    /* moving “mist + garden light” */
     .garden-bg::before {
       content: "";
       position: absolute;
@@ -62,7 +61,6 @@
       transform: translate3d(0,0,0);
     }
 
-    /* subtle paper texture */
     .garden-bg::after {
       content: "";
       position: absolute;
@@ -78,7 +76,6 @@
       100% { transform: translate(-4%, -2%) rotate(-2deg); }
     }
 
-    /* princess silhouette + trees/flowers vibe (inline SVG as background layer) */
     .garden-silhouette {
       position: fixed;
       inset: 0;
@@ -99,13 +96,10 @@
       <stop offset='1' stop-color='%23c5a059' stop-opacity='0.6'/>\
     </linearGradient>\
   </defs>\
-  <!-- trees -->\
   <path d='M90 720 C120 600 140 520 170 420 C190 340 170 260 150 220 C220 250 260 330 270 410 C280 510 250 600 240 720 Z' fill='url(%23g)' opacity='0.55'/>\
   <path d='M650 740 C630 610 610 520 590 430 C560 330 590 260 620 220 C540 250 500 330 500 410 C500 520 540 620 560 740 Z' fill='url(%23g)' opacity='0.45'/>\
-  <!-- princess silhouette (simple) -->\
   <path d='M430 650 C420 610 410 580 400 550 C390 520 390 500 400 470 C410 440 430 420 450 410 C455 395 450 380 440 370 C470 360 505 380 500 410 C515 430 535 455 535 490 C535 520 520 550 500 575 C495 600 492 625 500 650 C475 660 455 660 430 650 Z' fill='%231a2a1d' opacity='0.9'/>\
   <circle cx='460' cy='360' r='26' fill='%231a2a1d' opacity='0.9'/>\
-  <!-- flowers -->\
   <g opacity='0.5'>\
     <circle cx='120' cy='690' r='10' fill='%23c5a059'/>\
     <circle cx='140' cy='700' r='8' fill='%23e8d5d1'/>\
@@ -117,7 +111,9 @@
 </svg>");
     }
 
-    /* floating petals */
+    /* =========================
+       PETALS (background)
+       ========================= */
     .petals {
       position: fixed;
       inset: 0;
@@ -141,6 +137,38 @@
     @keyframes fall {
       0%   { transform: translate3d(0, -20px, 0) rotate(10deg); }
       100% { transform: translate3d(0, 120vh, 0) rotate(260deg); }
+    }
+
+    /* =========================
+       BIRDS (background flying)
+       ========================= */
+    .birds {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0.55;
+      filter: blur(0.2px);
+    }
+    .bird {
+      position: absolute;
+      top: 15vh;
+      left: -15vw;
+      width: 48px;
+      height: 24px;
+      opacity: 0.55;
+      transform: translate3d(0,0,0) scale(1);
+      animation: flyAcross linear infinite;
+    }
+    .bird svg { width: 100%; height: 100%; }
+
+    @keyframes flyAcross {
+      0%   { transform: translateX(-20vw) translateY(0) scale(0.85); opacity: 0; }
+      10%  { opacity: 0.6; }
+      50%  { transform: translateX(55vw) translateY(-12px) scale(1); opacity: 0.65; }
+      90%  { opacity: 0.55; }
+      100% { transform: translateX(120vw) translateY(8px) scale(0.9); opacity: 0; }
     }
 
     /* Decorative Elements */
@@ -211,7 +239,6 @@
     .btn-save { background: var(--gold); color: white; }
     .btn-save:hover { background: var(--deep-green); border-color: var(--deep-green); }
 
-    /* Sound toggle button */
     .btn-sound {
       border-color: rgba(197,160,89,0.65);
       color: var(--deep-green);
@@ -231,10 +258,10 @@
 </head>
 
 <body>
-  <!-- Secret garden layers -->
   <div class="garden-bg"></div>
   <div class="garden-silhouette"></div>
   <div class="petals" id="petals"></div>
+  <div class="birds" id="birds"></div>
 
   <div class="vignette"></div>
   <img src="https://www.transparenttextures.com/patterns/flowers.png" class="botanical top-left" />
@@ -252,10 +279,10 @@
       </p>
 
       <div class="btn-group" style="margin-top:18px;">
-        <button class="btn btn-sound" id="soundBtn" type="button">Sound: Off</button>
+        <button class="btn btn-sound active" id="soundBtn" type="button">Sound: On</button>
       </div>
       <p style="font-size:0.6rem; opacity:0.55; letter-spacing:1px; margin-top:10px;">
-        (Tap “Sound” once — browsers require user interaction.)
+        (Sound will begin on your first tap/click — browser rule.)
       </p>
     </div>
 
@@ -281,7 +308,7 @@
       <div class="btn-group">
         <button class="btn" onclick="location.reload()">Reset</button>
         <button class="btn btn-save" onclick="saveImage()">Save Picture</button>
-        <button class="btn btn-sound" id="soundBtn2" type="button">Sound: Off</button>
+        <button class="btn btn-sound active" id="soundBtn2" type="button">Sound: On</button>
       </div>
       <p style="font-size: 0.6rem; margin-top: 20px; opacity: 0.5; letter-spacing: 1px;">
         Saved to your downloads folder
@@ -291,7 +318,7 @@
 
   <script>
     /* =========================
-       PETALS (animated garden)
+       PETALS
        ========================= */
     const petalsHost = document.getElementById('petals');
     function spawnPetals(count = 16) {
@@ -316,166 +343,232 @@
     window.addEventListener('resize', () => spawnPetals(window.innerWidth < 480 ? 12 : 18));
 
     /* =========================
-       SOUND: Wind + Birds (WebAudio)
+       BIRD FLYING VISUALS
+       ========================= */
+    const birdsHost = document.getElementById('birds');
+
+    function spawnBird() {
+      if (!birdsHost) return;
+
+      const bird = document.createElement('div');
+      bird.className = 'bird';
+
+      const top = 10 + Math.random() * 35;           // 10vh–45vh
+      const dur = 10 + Math.random() * 12;           // 10–22s
+      const delay = Math.random() * 3;               // 0–3s
+      const scale = 0.65 + Math.random() * 0.65;     // 0.65–1.3
+      const opacity = 0.22 + Math.random() * 0.35;   // subtle
+
+      bird.style.top = top + 'vh';
+      bird.style.animationDuration = dur + 's';
+      bird.style.animationDelay = delay + 's';
+      bird.style.opacity = opacity.toFixed(2);
+      bird.style.width = (42 + Math.random() * 28) + 'px';
+      bird.style.height = (20 + Math.random() * 12) + 'px';
+      bird.style.transform = `scale(${scale.toFixed(2)})`;
+
+      bird.innerHTML = `
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10,40 C30,20 45,20 60,35 C75,20 90,20 110,40"
+                fill="none" stroke="rgba(26,42,29,0.55)" stroke-width="3.2"
+                stroke-linecap="round" />
+          <path d="M18,42 C34,30 45,30 58,39"
+                fill="none" stroke="rgba(197,160,89,0.30)" stroke-width="2.0"
+                stroke-linecap="round" />
+        </svg>
+      `;
+
+      birdsHost.appendChild(bird);
+      setTimeout(() => bird.remove(), (dur + delay + 1) * 1000);
+    }
+
+    function startBirdFlights() {
+      spawnBird();
+      setInterval(() => {
+        if (Math.random() > 0.35) spawnBird();
+      }, 2500);
+    }
+    startBirdFlights();
+
+    /* =========================
+       SOUND: Birds only (lovely)
+       Default ON, auto-start on first interaction
        ========================= */
     let audioCtx = null;
     let masterGain = null;
-    let windGain = null;
-    let windNode = null;
     let birdTimer = null;
-    let soundOn = false;
+
+    let soundOn = true;      // default ON
+    let audioPrimed = false; // becomes true after first user gesture
 
     function ensureAudio() {
       if (audioCtx) return;
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
       masterGain = audioCtx.createGain();
-      masterGain.gain.value = 0.0; // start muted
+      masterGain.gain.value = 0.0001;
       masterGain.connect(audioCtx.destination);
-
-      // WIND: filtered noise
-      const bufferSize = 2 * audioCtx.sampleRate;
-      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
-
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = noiseBuffer;
-      noise.loop = true;
-
-      const bandpass = audioCtx.createBiquadFilter();
-      bandpass.type = 'bandpass';
-      bandpass.frequency.value = 420;
-      bandpass.Q.value = 0.6;
-
-      const lowpass = audioCtx.createBiquadFilter();
-      lowpass.type = 'lowpass';
-      lowpass.frequency.value = 900;
-
-      windGain = audioCtx.createGain();
-      windGain.gain.value = 0.08;
-
-      // slow “gust” modulation
-      const lfo = audioCtx.createOscillator();
-      lfo.type = 'sine';
-      lfo.frequency.value = 0.06;
-      const lfoGain = audioCtx.createGain();
-      lfoGain.gain.value = 0.06;
-      lfo.connect(lfoGain);
-      lfoGain.connect(windGain.gain);
-
-      noise.connect(bandpass);
-      bandpass.connect(lowpass);
-      lowpass.connect(windGain);
-      windGain.connect(masterGain);
-
-      noise.start();
-      lfo.start();
-
-      windNode = noise;
     }
 
-    function chirpOnce() {
-      if (!audioCtx || !soundOn) return;
+    function pleasantChirp() {
+      if (!audioCtx || !audioPrimed || !soundOn) return;
 
-      // a tiny bird chirp: quick pitch sweep sine
-      const osc = audioCtx.createOscillator();
+      const now = audioCtx.currentTime;
+
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       const filter = audioCtx.createBiquadFilter();
 
-      osc.type = 'sine';
-      filter.type = 'bandpass';
-      filter.frequency.value = 2500;
-      filter.Q.value = 6;
+      osc1.type = "sine";
+      osc2.type = "triangle";
 
-      const now = audioCtx.currentTime;
-      const base = 1600 + Math.random() * 900;
+      filter.type = "bandpass";
+      filter.frequency.value = 2600;
+      filter.Q.value = 9;
 
-      osc.frequency.setValueAtTime(base, now);
-      osc.frequency.exponentialRampToValueAtTime(base * (1.4 + Math.random() * 0.4), now + 0.08);
+      const base = 1400 + Math.random() * 900;   // pleasant range
+      const sweepUp = 1.35 + Math.random() * 0.25;
+      const duration = 0.18 + Math.random() * 0.08;
 
+      osc1.frequency.setValueAtTime(base, now);
+      osc1.frequency.exponentialRampToValueAtTime(base * sweepUp, now + duration * 0.65);
+
+      osc2.frequency.setValueAtTime(base * 0.98, now);
+      osc2.frequency.exponentialRampToValueAtTime(base * sweepUp * 1.02, now + duration * 0.65);
+
+      const lfo = audioCtx.createOscillator();
+      const lfoGain = audioCtx.createGain();
+      lfo.type = "sine";
+      lfo.frequency.value = 10 + Math.random() * 3;
+      lfoGain.gain.value = 16 + Math.random() * 8;  // gentle vibrato depth
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc1.frequency);
+      lfoGain.connect(osc2.frequency);
+
+      const peak = 0.055; // softer, more pleasing
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.09, now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+      gain.gain.exponentialRampToValueAtTime(peak, now + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-      osc.connect(filter);
+      osc1.connect(filter);
+      osc2.connect(filter);
       filter.connect(gain);
       gain.connect(masterGain);
 
-      osc.start(now);
-      osc.stop(now + 0.22);
+      lfo.start(now);
+      osc1.start(now);
+      osc2.start(now);
+
+      const stopAt = now + duration + 0.02;
+      lfo.stop(stopAt);
+      osc1.stop(stopAt);
+      osc2.stop(stopAt);
     }
 
-    function startBirds() {
-      stopBirds();
+    function startBirdSoundLoop() {
+      stopBirdSoundLoop();
       const schedule = () => {
-        const t = 1400 + Math.random() * 2800; // 1.4s–4.2s
+        if (!soundOn || !audioPrimed) return;
+        const gap = 2200 + Math.random() * 5200; // calm
         birdTimer = setTimeout(() => {
-          // sometimes double chirp
-          chirpOnce();
-          if (Math.random() > 0.6) setTimeout(chirpOnce, 180 + Math.random() * 140);
+          pleasantChirp();
+          if (Math.random() > 0.65) setTimeout(pleasantChirp, 210 + Math.random() * 180);
           schedule();
-        }, t);
+        }, gap);
       };
       schedule();
     }
 
-    function stopBirds() {
-      if (birdTimer) {
-        clearTimeout(birdTimer);
-        birdTimer = null;
-      }
+    function stopBirdSoundLoop() {
+      if (birdTimer) clearTimeout(birdTimer);
+      birdTimer = null;
     }
 
-    async function setSound(on) {
+    async function primeAndApplyAudio() {
       ensureAudio();
-      if (audioCtx.state === 'suspended') {
-        try { await audioCtx.resume(); } catch(e) {}
+      if (audioCtx.state === "suspended") {
+        try { await audioCtx.resume(); } catch (e) {}
       }
-      soundOn = on;
-      if (masterGain) masterGain.gain.value = on ? 0.9 : 0.0;
+      audioPrimed = true;
 
-      if (on) startBirds();
-      else stopBirds();
+      const now = audioCtx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.exponentialRampToValueAtTime(soundOn ? 0.85 : 0.0001, now + 0.12);
+
+      if (soundOn) startBirdSoundLoop();
+    }
+
+    function setSound(on) {
+      soundOn = on;
+
+      if (!audioPrimed || !audioCtx || !masterGain) {
+        updateSoundButtons();
+        return;
+      }
+
+      const now = audioCtx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.exponentialRampToValueAtTime(on ? 0.85 : 0.0001, now + 0.12);
+
+      if (on) startBirdSoundLoop();
+      else stopBirdSoundLoop();
 
       updateSoundButtons();
     }
 
-    function toggleSound() {
-      setSound(!soundOn);
-    }
+    function toggleSound() { setSound(!soundOn); }
 
     function updateSoundButtons() {
-      const label = soundOn ? 'Sound: On' : 'Sound: Off';
-      const btns = [document.getElementById('soundBtn'), document.getElementById('soundBtn2')].filter(Boolean);
+      const label = soundOn ? "Sound: On" : "Sound: Off";
+      const btns = [document.getElementById("soundBtn"), document.getElementById("soundBtn2")].filter(Boolean);
       btns.forEach(b => {
         b.textContent = label;
-        b.classList.toggle('active', soundOn);
+        b.classList.toggle("active", soundOn);
       });
     }
 
-    document.getElementById('soundBtn').addEventListener('click', toggleSound);
+    // Autostart audio on first interaction (browser rule)
+    function bindAutoStart() {
+      const once = async () => {
+        await primeAndApplyAudio();
+        updateSoundButtons();
+        window.removeEventListener("pointerdown", once);
+        window.removeEventListener("keydown", once);
+      };
+      window.addEventListener("pointerdown", once);
+      window.addEventListener("keydown", once);
+    }
+    bindAutoStart();
+    updateSoundButtons();
+
+    // Bind sound buttons
+    document.getElementById("soundBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleSound();
+    });
 
     /* =========================
        Your existing logic
        ========================= */
     const colorPalette = [
-      { name: "Ivory Silk", hex: "#fffdf0", quote: "To love at all is to be vulnerable.", source: "C.S. Lewis", movie: "Shadowlands", movieDesc: "Love understood through loss.", book: "The Four Loves", bookDesc: "A philosophical anatomy of affection." },
-      { name: "Vintage Champagne", hex: "#f5ead0", quote: "Love is not blind; it sees more, not less.", source: "Erich Fromm", movie: "In the Mood for Love", movieDesc: "Restraint and recognition without possession.", book: "A Lover's Discourse", bookDesc: "Love experienced as a series of fragments." },
-      { name: "Tudor Rose", hex: "#fce3e3", quote: "Everything that frightens us is something helpless that wants our love.", source: "Rainer Maria Rilke", movie: "The Shape of Water", movieDesc: "Tenderness toward the unfamiliar.", book: "Letters to a Young Poet", bookDesc: "Solitude as the ground of mature love." },
-      { name: "English Lavender", hex: "#e8e1f5", quote: "It is not necessary to hurry intimacy.", source: "Anne Carson", movie: "Before Sunset", movieDesc: "Connection shaped by time.", book: "Eros the Bittersweet", bookDesc: "Desire defined by distance." },
-      { name: "Versailles Sage", hex: "#e2ede4", quote: "The world is full of magic things, patiently waiting for our senses to grow sharper.", source: "W.B. Yeats", movie: "Song of the Sea", movieDesc: "Myth as a form of care.", book: "The Wind Among the Reeds", bookDesc: "Poetry of perception and longing." },
-      { name: "Gilded Moss", hex: "#ecebbd", quote: "The only way to make sense out of change is to plunge into it.", source: "Alan Watts", movie: "Spring, Summer, Fall, Winter... and Spring", movieDesc: "The cyclical nature of the soul.", book: "The Wisdom of Insecurity", bookDesc: "Finding love in the ephemeral." },
-      { name: "Biedermeier Blue", hex: "#e0f0f5", quote: "Loneliness is the poverty of self; solitude is the richness of self.", source: "May Sarton", movie: "Lost in Translation", movieDesc: "Distance without deficiency.", book: "Journal of a Solitude", bookDesc: "A defense of the inner life." },
-      { name: "Old Manor Taupe", hex: "#ede6e1", quote: "Acceptance is a small, quiet room.", source: "Cheryl Strayed", movie: "Nomadland", movieDesc: "Dignity without possession.", book: "Tiny Beautiful Things", bookDesc: "Love as presence." },
-      { name: "Terracotta Sundial", hex: "#f5e6d3", quote: "Beauty is in things imperfect, impermanent, and incomplete.", source: "Leonard Koren", movie: "Arrietty", movieDesc: "Care without ownership.", book: "The Beauty of the Ordinary", bookDesc: "Everyday aesthetics." },
-      { name: "Slate Manor", hex: "#e1e6e8", quote: "Love is the extremely difficult realization that something other than oneself is real.", source: "Iris Murdoch", movie: "Eternal Sunshine of the Spotless Mind", movieDesc: "The messy reality of modern memory.", book: "The Sovereignty of Good", bookDesc: "Love as the destruction of the ego." },
-      { name: "Linen Prayer", hex: "#fcfaf7", quote: "Love is not a relationship between one person and another, but a relationship between a person and love itself.", source: "Søren Kierkegaard", movie: "Still Walking", movieDesc: "Care expressed through repetition.", book: "Works of Love", bookDesc: "An ethical account of love." },
-      { name: "Orchard Ash", hex: "#f0f0f0", quote: "Love, by its very nature, is unworldly.", source: "Hannah Arendt", movie: "A Hidden Life", movieDesc: "Love that refuses usefulness.", book: "The Human Condition", bookDesc: "Love, labor, and political life." },
-      { name: "Cemetery Stone", hex: "#e3e3e3", quote: "To be alone is to be with the world without intermediaries.", source: "Maurice Blanchot", movie: "Taste of Cherry", movieDesc: "Existence without narrative.", book: "The Space of Literature", bookDesc: "Solitude as encounter." },
-      { name: "Pale Concrete", hex: "#ededeb", quote: "Nothing is missing. Something is simply not added.", source: "Gilles Deleuze", movie: "Columbus", movieDesc: "Meaning found without completion.", book: "Negotiations", bookDesc: "Absence understood as difference." },
-      { name: "Oat Chapel", hex: "#f3eddc", quote: "Love is an act of faith, and whoever is of little faith is also of little love.", source: "Erich Fromm", movie: "Ordet", movieDesc: "Love understood as faith.", book: "The Art of Loving", bookDesc: "Love as a skill, not a feeling." },
-      { name: "Ash Rose", hex: "#e6dede", quote: "Grief is the final manifestation of love.", source: "Joan Didion", movie: "Aftersun", movieDesc: "A portrait of memory.", book: "Blue Nights", bookDesc: "A meditation on loss." }
+      { name: "Ivory Silk", hex: "#fffdf0", quote: "To love at all is to be vulnerable.", source: "C.S. Lewis", movie: "Shadowlands", book: "The Four Loves" },
+      { name: "Vintage Champagne", hex: "#f5ead0", quote: "Love is not blind; it sees more, not less.", source: "Erich Fromm", movie: "In the Mood for Love", book: "A Lover's Discourse" },
+      { name: "Tudor Rose", hex: "#fce3e3", quote: "Everything that frightens us is something helpless that wants our love.", source: "Rainer Maria Rilke", movie: "The Shape of Water", book: "Letters to a Young Poet" },
+      { name: "English Lavender", hex: "#e8e1f5", quote: "It is not necessary to hurry intimacy.", source: "Anne Carson", movie: "Before Sunset", book: "Eros the Bittersweet" },
+      { name: "Versailles Sage", hex: "#e2ede4", quote: "The world is full of magic things, patiently waiting for our senses to grow sharper.", source: "W.B. Yeats", movie: "Song of the Sea", book: "The Wind Among the Reeds" },
+      { name: "Gilded Moss", hex: "#ecebbd", quote: "The only way to make sense out of change is to plunge into it.", source: "Alan Watts", movie: "Spring, Summer, Fall, Winter... and Spring", book: "The Wisdom of Insecurity" },
+      { name: "Biedermeier Blue", hex: "#e0f0f5", quote: "Loneliness is the poverty of self; solitude is the richness of self.", source: "May Sarton", movie: "Lost in Translation", book: "Journal of a Solitude" },
+      { name: "Old Manor Taupe", hex: "#ede6e1", quote: "Acceptance is a small, quiet room.", source: "Cheryl Strayed", movie: "Nomadland", book: "Tiny Beautiful Things" },
+      { name: "Terracotta Sundial", hex: "#f5e6d3", quote: "Beauty is in things imperfect, impermanent, and incomplete.", source: "Leonard Koren", movie: "Arrietty", book: "The Beauty of the Ordinary" },
+      { name: "Slate Manor", hex: "#e1e6e8", quote: "Love is the extremely difficult realization that something other than oneself is real.", source: "Iris Murdoch", movie: "Eternal Sunshine of the Spotless Mind", book: "The Sovereignty of Good" },
+      { name: "Linen Prayer", hex: "#fcfaf7", quote: "Love is not a relationship between one person and another, but a relationship between a person and love itself.", source: "Søren Kierkegaard", movie: "Still Walking", book: "Works of Love" },
+      { name: "Orchard Ash", hex: "#f0f0f0", quote: "Love, by its very nature, is unworldly.", source: "Hannah Arendt", movie: "A Hidden Life", book: "The Human Condition" },
+      { name: "Cemetery Stone", hex: "#e3e3e3", quote: "To be alone is to be with the world without intermediaries.", source: "Maurice Blanchot", movie: "Taste of Cherry", book: "The Space of Literature" },
+      { name: "Pale Concrete", hex: "#ededeb", quote: "Nothing is missing. Something is simply not added.", source: "Gilles Deleuze", movie: "Columbus", book: "Negotiations" },
+      { name: "Oat Chapel", hex: "#f3eddc", quote: "Love is an act of faith, and whoever is of little faith is also of little love.", source: "Erich Fromm", movie: "Ordet", book: "The Art of Loving" },
+      { name: "Ash Rose", hex: "#e6dede", quote: "Grief is the final manifestation of love.", source: "Joan Didion", movie: "Aftersun", book: "Blue Nights" }
     ];
 
     const deck = document.getElementById('deck-container');
@@ -489,26 +582,16 @@
         card.style.zIndex = i;
         card.innerHTML = '<div class="card-crest">❦</div>';
         card.style.transform = `translate(${i * 0.5}px, ${i * 0.5}px)`;
-
         card.onclick = () => {
-          // Start audio on first real interaction (autoplay safe)
-          if (!audioCtx) ensureAudio();
-
           if (shuffleState < 3) runShuffle();
           else if (shuffleState === 4) revealCard();
         };
-
         deck.appendChild(card);
       }
     }
 
     function runShuffle() {
       shuffleState++;
-
-      // if user has not enabled sound yet, gently “prime” audio without forcing it on
-      // (still muted unless they toggle Sound: On)
-      ensureAudio();
-
       const cards = document.querySelectorAll('.card');
       cards.forEach((card) => {
         const rx = (Math.random() - 0.5) * 400;
@@ -548,17 +631,15 @@
         document.getElementById('book-title').innerText = data.book;
         setTimeout(() => { document.getElementById('result-screen').style.opacity = '1'; }, 100);
 
-        // attach second sound button once result screen exists
         const b2 = document.getElementById('soundBtn2');
         if (b2 && !b2.dataset.bound) {
           b2.dataset.bound = "1";
-          b2.addEventListener('click', toggleSound);
+          b2.addEventListener('click', (e) => { e.stopPropagation(); toggleSound(); });
           updateSoundButtons();
         }
       }, 1000);
     }
 
-    // Save Image
     function saveImage() {
       const captureArea = document.getElementById('capture-frame');
       html2canvas(captureArea, { backgroundColor: null, scale: 2 }).then(canvas => {
@@ -568,10 +649,6 @@
         link.click();
       });
     }
-
-    // bind the main sound button
-    document.getElementById('soundBtn').addEventListener('click', toggleSound);
-    updateSoundButtons();
 
     createDeck();
   </script>
