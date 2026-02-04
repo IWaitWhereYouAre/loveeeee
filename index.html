@@ -57,7 +57,7 @@
         #result-screen { display: none; opacity: 0; transition: opacity 1s ease; }
         
         #capture-frame {
-            background: #fff;
+            background: #ffffff;
             padding: 60px 40px;
             width: 380px;
             margin: 0 auto;
@@ -65,7 +65,7 @@
             border: 1px solid rgba(197, 160, 89, 0.2);
             box-shadow: 0 30px 60px rgba(0,0,0,0.05);
             background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
-            overflow: hidden; /* Clips the growing flowers */
+            overflow: hidden; 
         }
 
         #capture-frame::before {
@@ -73,13 +73,13 @@
             border: 0.5px solid var(--gold); pointer-events: none; z-index: 10;
         }
 
-        /* THE GARDEN GIMMICK: Personalized Growth Layer */
+        /* --- THE GARDEN FIX: GROWING ON THE CARD --- */
         #garden-growth-container {
             position: absolute;
             inset: 0;
             pointer-events: none;
-            z-index: 1;
-            mix-blend-mode: multiply;
+            z-index: 1; /* Above the paper base */
+            mix-blend-mode: multiply; /* Blends patterns into the card texture */
         }
 
         .bloom-leaf {
@@ -87,11 +87,16 @@
             background-image: url("https://www.transparenttextures.com/patterns/floral-paper.png");
             background-size: contain;
             background-repeat: no-repeat;
-            filter: sepia(0.6) brightness(0.9);
+            filter: sepia(0.5);
             opacity: 0;
+            transition: all 3s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 1;
         }
 
-        .content-layer { position: relative; z-index: 5; }
+        .content-layer { 
+            position: relative; 
+            z-index: 5; /* On top of the flowers */
+        }
 
         .result-isa { font-size: 0.55rem; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 20px; }
         .result-theme { font-family: 'Pinyon Script', cursive; font-size: 2.8rem; color: var(--deep-green); margin: 0; }
@@ -137,6 +142,7 @@
         <div id="result-screen">
             <div id="capture-frame">
                 <div id="garden-growth-container"></div>
+                
                 <div class="content-layer">
                     <span class="result-isa">ISA Chulalongkorn</span>
                     <h2 class="result-theme">Heart to Heart</h2>
@@ -239,20 +245,16 @@
                 const size = 300 + (random(i) * 300);
                 leaf.style.width = size + 'px';
                 leaf.style.height = size + 'px';
-                leaf.style.left = (random(i+1) * 120 - 20) + '%';
-                leaf.style.top = (random(i+2) * 120 - 20) + '%';
-                
-                // Set initial hidden state
-                leaf.style.transform = `rotate(${random(i+3) * 360}deg) scale(0.5)`;
-                leaf.style.transition = `all 3s cubic-bezier(0.19, 1, 0.22, 1) ${i * 0.2}s`;
+                leaf.style.left = (random(i+1) * 100 - 10) + '%';
+                leaf.style.top = (random(i+2) * 100 - 10) + '%';
+                leaf.style.transform = `rotate(${random(i+3) * 360}deg) scale(0.6)`;
                 
                 container.appendChild(leaf);
 
-                // Trigger bloom after a tiny delay so it's visible on screen
                 setTimeout(() => {
-                    leaf.style.opacity = (0.15 + random(i+4) * 0.2).toString();
+                    leaf.style.opacity = (0.15 + random(i+4) * 0.15).toString();
                     leaf.style.transform = `rotate(${random(i+3) * 360}deg) scale(1.1)`;
-                }, 100);
+                }, 200);
             }
         }
 
@@ -265,13 +267,11 @@
                 document.getElementById('ritual-screen').style.display = 'none';
                 document.getElementById('result-screen').style.display = 'block';
                 
-                // Load data
                 document.getElementById('quote-text').innerText = data.quote;
                 document.getElementById('quote-source').innerText = `— ${data.source}`;
                 document.getElementById('movie-title').innerText = data.movie;
                 document.getElementById('book-title').innerText = data.book;
                 
-                // Grow the Garden
                 generateGardenGrowth();
                 
                 setTimeout(() => { document.getElementById('result-screen').style.opacity = '1'; }, 100);
